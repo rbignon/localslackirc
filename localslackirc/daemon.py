@@ -18,6 +18,7 @@
 
 import argparse
 import asyncio
+import contextlib
 import logging
 import logging.handlers
 import os
@@ -87,7 +88,16 @@ class Daemon:
         try:
             loop.run_until_complete(cls().main())
         except KeyboardInterrupt:
-            return
+            pass
+        finally:
+            try:
+                all_tasks = asyncio.gather(*asyncio.all_tasks(loop), return_exceptions=True)
+                all_tasks.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    loop.run_until_complete(all_tasks)
+                loop.run_until_complete(loop.shutdown_asyncgens())
+            finally:
+                loop.close()
 
     @classmethod
     def create_default_logger(cls):

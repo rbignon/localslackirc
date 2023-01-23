@@ -455,7 +455,7 @@ class Slack:
 
         token: The slack token
         cookie: If the slack instance also uses a cookie, it must be passed here
-        previous_status: Opaque bytestring to restore internal status
+        previous_status: Opaque string to restore internal status
                 from a different object. Obtained from get_status()
         """
         self.client = SlackClient(token, cookie)
@@ -639,7 +639,7 @@ class Slack:
                 else:
                     break
 
-    def get_status(self) -> bytes:
+    def get_status(self) -> str:
         '''
         A status string that will be passed back when this is started again
         '''
