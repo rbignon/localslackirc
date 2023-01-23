@@ -257,7 +257,7 @@ class MessageDelete:
     type: Literal['message']
     subtype: Literal['message_deleted']
     channel: str  # The channel id
-    previous: NoChanMessage = field(metadata={'name': 'previous_message'})
+    previous: NoChanMessage = field(metadata={'name': 'previous_message'}, default=None)
     username: str = None
 
 

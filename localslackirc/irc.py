@@ -899,6 +899,10 @@ class Server:
         await self.send_message(diffmsg)
 
     async def send_message_delete(self, sl_ev: slack.MessageDelete) -> None:
+        # Can happen from a message from Slackbot only visible by me. Ignore this.
+        if not sl_ev.previous:
+            return
+
         msg = slack.Message(
             subtype=sl_ev.previous.subtype,
             text=f'[deleted] {sl_ev.previous.text}',
