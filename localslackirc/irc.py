@@ -935,10 +935,11 @@ class Server:
         try:
             channel = await self.sl_client.get_channel(sl_ev.channel)
         except KeyError:
-            im = await self.sl_client.get_im(sl_ev.channel)
-            if im and im.user != sl_ev.user:
-                source = (await self.sl_client.get_user(im.user)).name
-                text = f'I say: {text}'
+            if sl_ev.subtype != 'bot_message':
+                im = await self.sl_client.get_im(sl_ev.channel)
+                if im and im.user != sl_ev.user:
+                    source = (await self.sl_client.get_user(im.user)).name
+                    text = f'I say: {text}'
 
             dest = self.client.nickname
             yelldest = ''
