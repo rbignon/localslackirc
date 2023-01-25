@@ -1025,6 +1025,9 @@ class Server:
 
         await self.sendcmd(user, 'TOPIC', channel, sl_ev.topic.replace('\n', ' | '))
 
+    async def channel_created(self, sl_ev: slack.ChannelCreated) -> None:
+        await self.sendcmd(self, 'INVITE', self.client.nickname, sl_ev.channel.irc_name)
+
     async def slack_event(self, sl_ev: slack.SlackEvent) -> None:
         if not self.client.is_registered:
             self.held_events.append(sl_ev)
@@ -1042,13 +1045,15 @@ class Server:
             await self.member_joined_or_left(sl_ev, False)
         elif isinstance(sl_ev, slack.TopicChange):
             await self.topic_changed(sl_ev)
+        elif isinstance(sl_ev, slack.ChannelCreated):
+            await self.channel_created(sl_ev)
         elif isinstance(sl_ev, (slack.GroupJoined, slack.ChannelJoined, slack.MPIMJoined)):
             if not sl_ev.channel:
                 sl_ev.channel = await self.sl_client.get_channel(sl_ev.channel_id)
             assert sl_ev.channel
 
             await self.join_channel(sl_ev.channel)
-        elif isinstance(sl_ev, (slack.GroupLeft, slack.ChannelLeft, slack.MPIMLeft)):
+        elif isinstance(sl_ev, (slack.GroupLeft, slack.ChannelLeft, slack.MPIMLeft, slack.ChannelDeleted)):
             await self.leave_channel(sl_ev.channel_id, sl_ev.actor_id)
         elif isinstance(sl_ev, slack.UserTyping):
             if sl_ev.user not in self.annoy_users:

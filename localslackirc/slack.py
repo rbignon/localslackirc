@@ -35,7 +35,10 @@ T = TypeVar('T')
 
 USELESS_EVENTS = frozenset((
     'accounts_changed',
+    'apps_changed',
     'bot_added',
+    'bot_changed',
+    'channel_archive',  # Weirdly, in that case server sends also a channel_left event
     'channel_marked',
     'channel_sections_channels_removed',
     'channel_sections_channels_upserted',
@@ -46,6 +49,7 @@ USELESS_EVENTS = frozenset((
     'draft_delete',
     'draft_send',
     'draft_sent',
+    'emoji_changed',
     'file_created',
     'file_deleted',
     'file_public',
@@ -65,6 +69,7 @@ USELESS_EVENTS = frozenset((
     'thread_marked',
     'thread_subscribed',
     'thread_unsubscribed',
+    'unfurl_preview_updated',
     'update_thread_state',
 ))
 
@@ -118,8 +123,8 @@ class Channel:
     """
     id: str
     name_normalized: str
-    purpose: Topic
-    topic: Topic
+    purpose: Topic = None
+    topic: Topic = None
     num_members: int = 0
     #: Membership: present on channels, not on groups - but True there.
     is_member: bool = True
@@ -141,11 +146,12 @@ class Channel:
 
     @property
     def real_topic(self) -> str:
-        if self.topic.value:
-            t = self.topic.value
+        if self.topic and self.topic.value:
+            return self.topic.value
+        elif self.purpose:
+            return self.purpose.value
         else:
-            t = self.purpose.value
-        return t
+            return ''
 
 
 @dataclass(frozen=True)
@@ -184,6 +190,19 @@ class NoChanMessage(NamedTuple):
     thread_ts: Optional[str] = None
     subtype: str = None
     username: str = None
+
+
+@dataclass
+class ChannelCreated:
+    type: Literal['channel_created']
+    channel: Channel
+
+
+@dataclass
+class ChannelDeleted:
+    type: Literal['channel_deleted']
+    channel_id: str = field(metadata={'name': 'channel'})
+    actor_id: str
 
 
 @dataclass
@@ -428,6 +447,8 @@ SlackEvent = (
     MessageBot |
     Join |
     Leave |
+    ChannelCreated |
+    ChannelDeleted |
     GroupJoined |
     ChannelJoined |
     MPIMJoined |
