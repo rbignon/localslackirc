@@ -767,6 +767,8 @@ class Server:
         if channel_name in self.joined_channels:
             return
 
+        self.joined_channels.add(channel_name)
+
         if not self.settings.nouserlist:
             members = await self.sl_client.get_members(slchan.id)
 
@@ -793,7 +795,6 @@ class Server:
         await self.sendreply(Replies.RPL_NAMREPLY, '=', channel_name, '' if self.settings.nouserlist else users)
         await self.sendreply(Replies.RPL_ENDOFNAMES, channel_name, 'End of NAMES list')
 
-        self.joined_channels.add(channel_name)
 
     async def leave_channel(self, channel_id: str, actor_id: str):
         assert self.client is not None
