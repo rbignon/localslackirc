@@ -915,12 +915,14 @@ class Server:
 
         await self.send_message(msg)
 
-    async def send_message(self, sl_ev: slack.Message | slack.MessageBot, prefix: str = ''):
+    async def send_message(self, sl_ev: slack.Message | slack.MessageBot):
         """
         Sends a message to the irc client
         """
         if sl_ev.subtype in ('channel_join', 'channel_leave'):
             return
+
+        text = sl_ev.text
 
         if sl_ev.username:
             source = sl_ev.username
@@ -928,8 +930,7 @@ class Server:
             source = (await self.sl_client.get_user(sl_ev.user)).name
         else:
             source = 'bot'
-
-        text = sl_ev.text
+            text = f'[{sl_ev.username}] ' + text
 
         try:
             channel = await self.sl_client.get_channel(sl_ev.channel)
@@ -958,7 +959,7 @@ class Server:
             for f in sl_ev.files:
                 text += f'\n[file upload] {f.name}\n{f.mimetype} {f.size} bytes\n{f.url_private}'
 
-        lines = (await self.parse_slack_message(prefix + text, source, yelldest))
+        lines = (await self.parse_slack_message(text, source, yelldest))
 
         if sl_ev.thread_ts:
             # Threaded message, only for chans
@@ -1028,14 +1029,12 @@ class Server:
             self.held_events.append(sl_ev)
             return
 
-        if isinstance(sl_ev, slack.Message):
+        if isinstance(sl_ev, (slack.Message, slack.MessageBot)):
             await self.send_message(sl_ev)
         elif isinstance(sl_ev, slack.MessageDelete):
             await self.send_message_delete(sl_ev)
         elif isinstance(sl_ev, slack.MessageEdit):
             await self.send_message_edit(sl_ev)
-        elif isinstance(sl_ev, slack.MessageBot):
-            await self.send_message(sl_ev, f'[{sl_ev.username}] ')
         elif isinstance(sl_ev, slack.Join):
             await self.member_joined_or_left(sl_ev, True)
         elif isinstance(sl_ev, slack.Leave):
