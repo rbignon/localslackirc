@@ -49,6 +49,7 @@ USELESS_EVENTS = frozenset((
     'draft_delete',
     'draft_send',
     'draft_sent',
+    'draft_update',
     'emoji_changed',
     'file_created',
     'file_deleted',
@@ -133,6 +134,7 @@ class Channel:
     is_channel: bool = False
     is_group: bool = False
     is_mpim: bool = False
+    is_private: bool = False
 
     latest: Optional[LatestMessage] = None
 
@@ -143,6 +145,18 @@ class Channel:
     @property
     def irc_name(self):
         return '#' + self.name
+
+    @property
+    def irc_modes(self):
+        modes = '+'
+        if self.is_private:
+            modes += 'p'
+        if self.is_group:
+            modes += 'g'
+        if self.is_mpim:
+            modes += 'i'
+
+        return modes
 
     @property
     def real_topic(self) -> str:
@@ -377,6 +391,15 @@ class User(NamedTuple):
     @property
     def real_name(self) -> str:
         return self.profile.real_name
+
+    @property
+    def irc_modes(self) -> str:
+        modes = '+'
+        if self.is_admin:
+            modes += 'a'
+        if self.is_owner:
+            modes += 'o'
+        return modes
 
 
 @dataclass

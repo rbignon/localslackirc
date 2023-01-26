@@ -85,6 +85,7 @@ class Replies(Enum):
     ERR_NEEDMOREPARAMS = 461
     ERR_UNKNOWNMODE = 472
     ERR_UMODEUNKNOWNFLAG = 501
+    ERR_USERSDONTMATCH = 502
     RPL_WHOISSECURE = 671
     RPL_WHOISKEYVALUE = 760
 
@@ -155,6 +156,7 @@ class Client:
     username: str = ''
     realname: str = ''
     hostname: str = ''
+    modes: str = '+'
 
     is_registered = False
 
@@ -348,6 +350,10 @@ class Server:
             await self.sendcmd(self.client, 'NICK', self.sl_client.login_info.self.name)
             self.client.nickname = self.sl_client.login_info.self.name
 
+        sluser = await self.sl_client.get_user_by_name(self.client.nickname)
+        self.client.modes = sluser.irc_modes
+        await self.sendcmd(self.client, 'MODE', self.client.nickname, self.client.modes)
+
         if self.settings.autojoin:
             mpim_cutoff = datetime.datetime.utcnow() - MPIM_HIDE_DELAY
 
@@ -499,6 +505,11 @@ class Server:
     @parse_args('channel', 'modes', minargs=1)
     async def cmd_mode(self, channel: str, modes: str = None) -> None:
         if channel.startswith('#'):
+            try:
+                slchan = (await self.sl_client.get_channel_by_name(channel[1:]))
+            except KeyError:
+                return await self.sendreply(Replies.ERR_NOSUCHCHANNEL, channel, 'No such channel')
+
             if modes:
                 for mode in modes:
                     if mode == 'b':
@@ -506,12 +517,14 @@ class Server:
                     if mode not in ('+', '-'):
                         return await self.sendreply(Replies.ERR_UNKNOWNMODE, mode, 'is an unknown mode char to me')
             else:
-                await self.sendreply(Replies.RPL_CHANNELMODEIS, channel, '+')
-        else:
+                await self.sendreply(Replies.RPL_CHANNELMODEIS, channel, slchan.irc_modes)
+        elif channel == self.client.nickname:
             if modes:
                 await self.sendreply(Replies.ERR_UMODEUNKNOWNFLAG, 'Unknown MODE flag')
             else:
-                await self.sendreply(Replies.RPL_UMODEIS, channel, '+')
+                await self.sendreply(Replies.RPL_UMODEIS, self.client.modes)
+        else:
+            await self.sendreply(Replies.ERR_USERSDONTMATCH, "Can't change mode for other users")
 
     @registered_command
     @parse_args('user', 'duration', minargs=1)
@@ -790,7 +803,7 @@ class Server:
         topic = (await self.parse_slack_message(slchan.real_topic, '', channel_name)).replace('\n', ' | ')
 
         await self.sendcmd(self.client, 'JOIN', channel_name)
-        await self.sendcmd(self, 'MODE', channel_name, '+')
+        await self.sendcmd(self, 'MODE', channel_name, slchan.irc_modes)
         await self.sendreply(Replies.RPL_TOPIC, channel_name, topic)
         await self.sendreply(Replies.RPL_NAMREPLY, '=', channel_name, '' if self.settings.nouserlist else users)
         await self.sendreply(Replies.RPL_ENDOFNAMES, channel_name, 'End of NAMES list')
