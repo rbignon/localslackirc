@@ -175,13 +175,13 @@ class Message:
 
 
 @dataclass(frozen=True)
-class MessageReplied:
+class IgnoredMessage:
     """
     We don't care about this message, but as the type is 'message', we need to
     handle it.
     """
     type: Literal['message']
-    subtype: Literal['message_replied']
+    subtype: Literal['message_replied'] | Literal['channel_name']
 
 
 class NoChanMessage(NamedTuple):
@@ -218,6 +218,26 @@ class GroupJoined:
 @dataclass
 class ChannelJoined:
     type: Literal['channel_joined']
+    channel: Channel
+
+    @property
+    def channel_id(self):
+        return self.channel.id
+
+
+@dataclass
+class GroupRename:
+    type: Literal['group_rename']
+    channel: Channel
+
+    @property
+    def channel_id(self):
+        return self.channel.id
+
+
+@dataclass
+class ChannelRename:
+    type: Literal['channel_rename']
     channel: Channel
 
     @property
@@ -441,6 +461,7 @@ class Conversation(NamedTuple):
 
 SlackEvent = (
     TopicChange |
+    IgnoredMessage |
     MessageDelete |
     MessageEdit |
     Message |
@@ -452,11 +473,12 @@ SlackEvent = (
     GroupJoined |
     ChannelJoined |
     MPIMJoined |
+    GroupRename |
+    ChannelRename |
     GroupLeft |
     ChannelLeft |
     MPIMLeft |
     UserTyping |
-    MessageReplied |
     UserChange
 )
 

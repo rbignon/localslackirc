@@ -795,8 +795,7 @@ class Server:
         await self.sendreply(Replies.RPL_NAMREPLY, '=', channel_name, '' if self.settings.nouserlist else users)
         await self.sendreply(Replies.RPL_ENDOFNAMES, channel_name, 'End of NAMES list')
 
-
-    async def leave_channel(self, channel_id: str, actor_id: str):
+    async def leave_channel(self, channel_id: str, actor_id: str = None):
         assert self.client is not None
 
         try:
@@ -819,6 +818,25 @@ class Server:
                 return await self.sendcmd(actor, 'KICK', channel, self.client.nickname)
 
         await self.sendcmd(self.client, 'PART', channel)
+
+    async def channel_rename(self, slchan: slack.Channel):
+        new_name = slchan.irc_name
+
+        try:
+            # Look into cache
+            previous_name = (await self.sl_client.get_channel(slchan.id)).irc_name
+        except KeyError:
+            logging.warning("Rename unknown channel to %s", new_name)
+
+        if previous_name not in self.joined_channels:
+            return
+
+        await self.leave_channel(slchan.id)
+
+        # Refresh channel
+        slchan = await self.sl_client.get_channel(slchan.id, refresh=True)
+
+        await self.join_channel(slchan)
 
     async def parse_slack_message(self, i: str, source: str, destination: str) -> str:
         """
@@ -1053,6 +1071,8 @@ class Server:
             assert sl_ev.channel
 
             await self.join_channel(sl_ev.channel)
+        elif isinstance(sl_ev, (slack.GroupRename, slack.ChannelRename)):
+            await self.channel_rename(sl_ev.channel)
         elif isinstance(sl_ev, (slack.GroupLeft, slack.ChannelLeft, slack.MPIMLeft, slack.ChannelDeleted)):
             await self.leave_channel(sl_ev.channel_id, sl_ev.actor_id)
         elif isinstance(sl_ev, slack.UserTyping):
