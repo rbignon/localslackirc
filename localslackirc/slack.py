@@ -35,6 +35,7 @@ T = TypeVar('T')
 
 USELESS_EVENTS = frozenset((
     'accounts_changed',
+    'app_actions_updated',
     'apps_changed',
     'bot_added',
     'bot_changed',
@@ -51,6 +52,7 @@ USELESS_EVENTS = frozenset((
     'draft_sent',
     'draft_update',
     'emoji_changed',
+    'file_change',
     'file_created',
     'file_deleted',
     'file_public',
