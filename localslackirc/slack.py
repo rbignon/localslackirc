@@ -621,7 +621,9 @@ class Slack:
             else:
                 break
         logging.info('Thread fetched')
-        r[0].thread_ts = None
+        if len(r) > 0:
+            # if not, maybe a thread with all messages deleted, handle it anyway.
+            r[0].thread_ts = None
         return r
 
     async def _history(self) -> None:
