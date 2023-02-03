@@ -82,6 +82,7 @@ class Replies(Enum):
     ERR_FILEERROR = 424
     ERR_ERRONEUSNICKNAME = 432
     ERR_NOTONCHANNEL = 442
+    ERR_NOTREGISTERED = 451
     ERR_NEEDMOREPARAMS = 461
     ERR_UNKNOWNMODE = 472
     ERR_UMODEUNKNOWNFLAG = 501
@@ -117,7 +118,7 @@ class ServerSettings(NamedTuple):
 def registered_command(func):
     async def inner(self, *args, **kwargs):
         if not self.client.is_registered:
-            return await self.sendreply(451, 'You have not registered')
+            return await self.sendreply(Replies.ERR_NOTREGISTERED, 'You have not registered')
         return await func(self, *args, **kwargs)
 
     return inner
