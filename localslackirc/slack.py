@@ -68,7 +68,9 @@ USELESS_EVENTS = frozenset((
     'pref_change',
     'reaction_added',
     'reaction_removed',
+    'subteam_updated',
     'team_join',
+    'team_pref_change',
     'thread_marked',
     'thread_subscribed',
     'thread_unsubscribed',
@@ -1046,6 +1048,13 @@ class Slack:
             )
             response = self.tload(r, Response)
             if response.ok and response.ts:
+                # Mark this channel as read
+                await self.client.api_call(
+                    'conversations.mark',
+                    channel=channel_id,
+                    ts=response.ts
+                )
+
                 self._sent_by_self.add(response.ts)
                 return
             raise ResponseException(response.error)
