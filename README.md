@@ -1,6 +1,9 @@
 localslackirc
 =============
 
+This is a fork of [localslackirc](https://github.com/ltworf/localslackirc). You
+can see [here](NEWS.md) what features has been added.
+
 The idea of this project is to create a localhost IRC server that functions as
 a gateway for one user of slack, that can connect to it with whatever IRC
 client they prefer or a bouncer like ZNC and keep using slack from IRC even
@@ -88,7 +91,7 @@ Sources
 Check the manpage for the parameters.
 
 ```bash
-./localslackirc
+python -m localslackirc
 ```
 
 Obtain a token
@@ -197,11 +200,13 @@ And you should see the following message in your irssi:
 22:15:35 [<slackname>] -!- Irssi: Looking up localhost
 22:15:35 [<slackname>] -!- Irssi: Connecting to localhost [127.0.0.1] port 9007
 22:15:35 [<slackname>] -!- Irssi: Connection to localhost established
-22:15:36 [<slackname>] -!- Hi, welcome to IRC
-22:15:36 [<slackname>] -!- Your host is serenity, running version miniircd-1.2.1
-22:15:36 [<slackname>] -!- This server was created sometime
-22:15:36 [<slackname>] -!- serenity miniircd-1.2.1 o o
-22:15:36 [<slackname>] -!- There are 1 users and 0 services on 1 server
+22:15:36 [<slackname>] -!- Welcome to the Slack Server Teamname, romain!
+22:15:36 [<slackname>] -!- Your host is domain.slack.com, running version localslackirc-2.0
+22:15:36 [<slackname>] -!- There are 145 users and 35 bots on 1 server
+22:15:36 [<slackname>] -!- 7 Slack Workspace Admins
+22:15:36 [<slackname>] -!- 143 channels formed
+22:15:36 [<slackname>] -!- You're now known as romain
+22:15:36 [<slackname>] -!- Mode change [+a] for user romain
 ...
 ```
 
