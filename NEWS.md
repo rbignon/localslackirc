@@ -35,24 +35,16 @@ romain [U03D36HJC14@domain.slack.com]
 End of WHOIS
 ```
 - if I send a message to a user who is away, I get a `RPL_AWAY` message
-- add `--thread-replies` parameter to display thread answers in IM/channels instead of creating a new channel
+- add `--thread-replies` parameter to display thread answers in IM/channels instead of creating a new channels
 - handle threads in IM
-- correctly handle edited/deleted messages in IM
-- fix `/me` messages
 - `USERHOST` displays away/admin flags
 - handle `CAP` command (currently empty)
 - handle `JOIN :` command sent by recent irssi versions during connection (I don't know why, but if it doesn't get the right answer it freezes)
-- fix crash in some case during shutdown or user disconnection
-- handle slack connection errors
 - handle `MODE` with parameters to display an error
 - handle `MODE +b` to display an emply banlist
 - add command `WHOWAS`
 - concatenate multilines topic
-- use colored logs
-- handle groups and MPIM join/parts
-- correctly deal with leaves of group/MPIM channels
-- do not crash if the process is gracefully killed
-- when a message is sent from the bot, use its name as sender instead of `bot`
+- when a message is sent from a bot, use its name as sender instead of `bot`
 - handle channels creation/rename/archive/delete
 - display modes on channels:
   * `+p`: private
@@ -61,7 +53,16 @@ End of WHOIS
 - display user modes:
   * `+a`: admin
   * `+o`: owner
-* when we answer in a conversation, mark it as read
+- when we answer in a conversation, mark it as read
+- use standard logging instead of syslog, and display colored logs in tty
+
+Bugfixes
+--------
+- fix `/me` messages
+- handle groups and MPIM join/parts
+- correctly deal with leaves of group/MPIM channels
+- correctly handle edited/deleted messages in IM
+- fix crash in some case during shutdown or user disconnection
 
 
 Internal changes
