@@ -43,6 +43,7 @@ USELESS_EVENTS = frozenset((
     'channel_marked',
     'channel_sections_channels_removed',
     'channel_sections_channels_upserted',
+    'channel_updated',
     'clear_mention_notification',
     'desktop_notification',
     'dnd_updated_user',
@@ -58,6 +59,7 @@ USELESS_EVENTS = frozenset((
     'file_public',
     'file_shared',
     'goodbye',  # Server is disconnecting us
+    'group_deleted',
     'group_marked',
     'hello',
     'im_close',
@@ -76,6 +78,7 @@ USELESS_EVENTS = frozenset((
     'thread_unsubscribed',
     'unfurl_preview_updated',
     'update_thread_state',
+    'view_updated',
 ))
 
 
